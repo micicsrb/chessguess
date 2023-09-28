@@ -17,8 +17,6 @@ function shuffleArray(array) {
     }
 }
 
-shuffleArray(squaresToGuess);
-
 // Create the chessboard
 coordinates.forEach(coordinate => {
     const square = document.createElement('div');
@@ -34,38 +32,34 @@ let correctGuesses = 0;
 let startTime;
 let isGameFinished = false;
 
-// Function to update the stopwatch display
 function updateStopwatch() {
     if (!isGameFinished) {
         const currentTime = Date.now();
-        const elapsedTime = (currentTime - startTime) / 100; // Calculate elapsed tenths of a second
-        const tenths = Math.floor(elapsedTime % 10); // Extract tenths of a second
+        const elapsedTime = (currentTime - startTime) / 100;
+        const tenths = Math.floor(elapsedTime % 10);
         const seconds = Math.floor(elapsedTime / 10) % 60;
         const minutes = Math.floor(elapsedTime / 600);
 
         const secondsFormatted = (seconds < 10 ? '0' : '') + seconds.toString();
 
-        const stopwatchElement = document.getElementById('time-display');
+        const stopwatchElement = document.getElementById('stopwatch');
         stopwatchElement.innerText = `${minutes}:${secondsFormatted}.${tenths}`;
 
         setTimeout(updateStopwatch, 100); // Update the stopwatch approximately every 100 milliseconds
     }
 }
 
-// Function to reveal the color of the square when guessed
 function revealColor(coordinate, color) {
     const square = document.querySelector(`.square[data-coordinate="${coordinate}"]`);
     square.classList.add(color);
     correctGuesses++;
 }
 
-// Function to mark the square as incorrect
 function markIncorrect(coordinate) {
     const square = document.querySelector(`.square[data-coordinate="${coordinate}"]`);
     square.classList.add('wrong');
 }
 
-// Event listener for key presses ('w' for white, 'b' for black)
 document.addEventListener('keydown', (event) => {
     if (event.repeat) {
         return;
@@ -74,29 +68,22 @@ document.addEventListener('keydown', (event) => {
     const keyCode = event.key.toString();
 
     if (keyCode === ' ') {
-        isGameFinished = true;
         restartGame();
         return;
     }
 
-    if (currentIndex === squaresToGuess.length || (keyCode !== 'w' && keyCode !== 'b')) {
+    if (isGameFinished || (keyCode !== 'l' && keyCode !== 'd')) {
         return;
-    }
-
-    if (!startTime) {
-        isGameFinished = false;
-        startTime = Date.now();
-        updateStopwatch();
     }
 
     const currentCoordinate = squaresToGuess[currentIndex];
 
-    if (keyCode === 'w' && currentCoordinate.charCodeAt(0) % 2 !== currentCoordinate[1] % 2) {
-        revealColor(currentCoordinate, 'white'); // White square color
-    } else if (keyCode === 'b' && currentCoordinate.charCodeAt(0) % 2 === currentCoordinate[1] % 2) {
-        revealColor(currentCoordinate, 'black'); // Black square color
-    } else if (keyCode === 'w' || keyCode === 'b') {
-        markIncorrect(currentCoordinate); // Mark the square as incorrect
+    if (keyCode === 'l' && currentCoordinate.charCodeAt(0) % 2 !== currentCoordinate[1] % 2) {
+        revealColor(currentCoordinate, 'light');
+    } else if (keyCode === 'd' && currentCoordinate.charCodeAt(0) % 2 === currentCoordinate[1] % 2) {
+        revealColor(currentCoordinate, 'dark');
+    } else if (keyCode === 'l' || keyCode === 'd') {
+        markIncorrect(currentCoordinate);
     }
 
     currentIndex++;
@@ -105,30 +92,77 @@ document.addEventListener('keydown', (event) => {
         document.getElementById('overlay').innerText = squaresToGuess[currentIndex];
     } else {
         document.getElementById('overlay').innerText = `${correctGuesses}/64`;
-        isGameFinished = true; // Set the game as finished
+        isGameFinished = true;
     }
 });
 
 function restartGame() {
+    isGameFinished = true;
     currentIndex = 0;
     correctGuesses = 0;
-    startTime = null;
 
-    const stopwatchElement = document.getElementById('time-display');
+    const stopwatchElement = document.getElementById('stopwatch');
     stopwatchElement.innerText = `0:00.0`;
 
     shuffleArray(squaresToGuess);
-    document.getElementById('overlay').innerText = squaresToGuess[currentIndex];
     clearBoard();
+    countdown();
+}
+
+function countdown() {
+    document.getElementById('overlay').innerText = '3';
+    setTimeout(() => {
+        document.getElementById('overlay').innerText = '2';
+        setTimeout(() => {
+            document.getElementById('overlay').innerText = '1';
+            setTimeout(() => {
+                document.getElementById('overlay').innerText = 'go!';
+                setTimeout(() => {
+                    isGameFinished = false;
+                    document.getElementById('overlay').innerText = squaresToGuess[currentIndex];
+                    startTime = Date.now();
+                    updateStopwatch();
+                }, 1000);
+            }, 1000);
+        }, 1000);
+    }, 1000);
 }
 
 function clearBoard() {
     // Remove all color classes from squares
     const squares = document.querySelectorAll('.square');
     squares.forEach(square => {
-        square.classList.remove('white', 'black', 'wrong');
+        square.classList.remove('light', 'dark', 'wrong');
     });
 }
 
-// Initial display of the first coordinate in the overlay
-document.getElementById('overlay').innerText = squaresToGuess[currentIndex];
+function displayTrueColors() {
+    let interval = 0.5;
+
+    function revealNextSquare() {
+        if (currentIndex < coordinates.length) {
+            const currentCoordinate = coordinates[currentIndex];
+            const currentSquare = document.querySelector(`.square[data-coordinate="${currentCoordinate}"]`);
+
+            // Change the background color to the true color with a delay
+            setTimeout(() => {
+                if (currentCoordinate.charCodeAt(0) % 2 !== currentCoordinate[1] % 2) {
+                    currentSquare.classList.add('light');
+                } else {
+                    currentSquare.classList.add('dark');
+                }
+
+                currentIndex++;
+                revealNextSquare();
+            }, interval);
+        } else {
+            // All squares have been revealed, start the game
+            document.getElementById('overlay').innerText = 'space';
+        }
+    }
+
+    revealNextSquare();
+}
+
+// Call the function to display true colors when the game is loaded for the first time
+displayTrueColors();

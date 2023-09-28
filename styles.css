@@ -4,7 +4,7 @@ body, h1, h2, p {
 }
 
 body {
-    font-family: 'Arial', sans-serif;
+    font-family: 'Calibri', sans-serif;
     background-color: #f2f2f2;
     display: flex;
     justify-content: center;
@@ -24,10 +24,11 @@ body {
 }
 
 h1 {
-    font-size: 37px;
+    font-size: 40px;
     color: #333;
     text-transform: uppercase;
-    margin-bottom: 20px;
+    margin-bottom: 15px;
+    margin-top: 5px;
 }
 
 .instructions {
@@ -40,7 +41,6 @@ h1 {
     display: grid;
     grid-template-columns: repeat(8, 70px);
     grid-template-rows: repeat(8, 70px);
-    background-color: #333;
     border-radius: 10px;
     border: 3px solid #333;
     overflow: hidden;
@@ -49,36 +49,38 @@ h1 {
 .square {
     outline: #333 solid 1px;
     background-color: #daedfc;
+    transition: background-color 0.25s ease;
+}
+
+.square.dark {
+    background-color: #779556;
+}
+
+.square.light {
+    background-color: #ebecd0;
 }
 
 .square.wrong {
     background-color: #de4a40;
 }
 
-.square.black {
-    background-color: #779556;
-}
-
-.square.white {
-    background-color: #ebecd0;
-}
-
 .overlay {
     position: absolute;
-    top: 50.25%;
+    top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
     color: rgba(255, 255, 255, 0.9);
-    font-size: 60px;
+    font-size: 55px;
     font-weight: bold;
     text-shadow: 2px 2px 5px rgba(0, 0, 0, 0.3);
     pointer-events: none;
 }
 
-#stopwatch {
+#stopwatch-container {
     font-size: 23px;
     color: #444;
     font-weight: bold;
     text-align: center;
     margin-top: 10px;
+    pointer-events: none;
 }
