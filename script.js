@@ -30,7 +30,7 @@ let correctGuesses = 0;
 
 // Stopwatch variables
 let startTime;
-let isGameFinished = false;
+let isGameFinished = true;
 
 function updateStopwatch() {
     if (!isGameFinished) {
@@ -46,6 +46,8 @@ function updateStopwatch() {
         stopwatchElement.innerText = `${minutes}:${secondsFormatted}.${tenths}`;
 
         setTimeout(updateStopwatch, 100); // Update the stopwatch approximately every 100 milliseconds
+    } else {
+        isGameFinished = false;
     }
 }
 
@@ -61,21 +63,11 @@ function markIncorrect(coordinate) {
 }
 
 document.addEventListener('keydown', (event) => {
-    if (event.repeat) {
+    if (event.repeat || isGameFinished) {
         return;
     }
 
     const keyCode = event.key.toString();
-
-    if (keyCode === ' ') {
-        restartGame();
-        return;
-    }
-
-    if (isGameFinished || (keyCode !== 'l' && keyCode !== 'd')) {
-        return;
-    }
-
     const currentCoordinate = squaresToGuess[currentIndex];
 
     if (keyCode === 'l' && currentCoordinate.charCodeAt(0) % 2 !== currentCoordinate[1] % 2) {
@@ -84,11 +76,14 @@ document.addEventListener('keydown', (event) => {
         revealColor(currentCoordinate, 'dark');
     } else if (keyCode === 'l' || keyCode === 'd') {
         markIncorrect(currentCoordinate);
+    } else if (keyCode === ' ') {
+        restartGame()
+        return;
+    } else {
+        return;
     }
 
-    currentIndex++;
-
-    if (currentIndex < squaresToGuess.length) {
+    if (++currentIndex < squaresToGuess.length) {
         document.getElementById('overlay').innerText = squaresToGuess[currentIndex];
     } else {
         document.getElementById('overlay').innerText = `${correctGuesses}/64`;
@@ -101,6 +96,7 @@ function restartGame() {
     currentIndex = 0;
     correctGuesses = 0;
 
+    document.getElementById('overlay').style.animation = '';
     const stopwatchElement = document.getElementById('stopwatch');
     stopwatchElement.innerText = `0:00.0`;
 
@@ -110,19 +106,28 @@ function restartGame() {
 }
 
 function countdown() {
-    document.getElementById('overlay').innerText = '3';
+    const overlayElement = document.getElementById('overlay');
+    overlayElement.innerText = '3';
+
     setTimeout(() => {
-        document.getElementById('overlay').innerText = '2';
+        overlayElement.innerText = '2';
+
         setTimeout(() => {
-            document.getElementById('overlay').innerText = '1';
+            overlayElement.innerText = '1';
+
             setTimeout(() => {
-                document.getElementById('overlay').innerText = 'go!';
+                overlayElement.innerText = 'go!';
+                overlayElement.style.animation = 'flashyExit 0.8s ease-in-out';
+
                 setTimeout(() => {
                     isGameFinished = false;
-                    document.getElementById('overlay').innerText = squaresToGuess[currentIndex];
+
+                    overlayElement.style.animation = '';
+                    overlayElement.innerText = squaresToGuess[currentIndex];
+
                     startTime = Date.now();
                     updateStopwatch();
-                }, 1000);
+                }, 750);
             }, 1000);
         }, 1000);
     }, 1000);
@@ -158,6 +163,8 @@ function displayTrueColors() {
         } else {
             // All squares have been revealed, start the game
             document.getElementById('overlay').innerText = 'space';
+            document.getElementById('overlay').style.animation = 'pulsate 1.5s infinite ease-in-out';
+            isGameFinished = false;
         }
     }
 

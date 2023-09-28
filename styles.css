@@ -64,16 +64,35 @@ h1 {
     background-color: #de4a40;
 }
 
-.overlay {
+#overlay-container {
     position: absolute;
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
+}
+
+.overlay {
     color: rgba(255, 255, 255, 0.9);
     font-size: 55px;
     font-weight: bold;
     text-shadow: 2px 2px 5px rgba(0, 0, 0, 0.3);
     pointer-events: none;
+}
+
+@keyframes pulsate {
+    0%, 100% {
+        transform: scale(0.95);
+    }
+    50% {
+        transform: scale(1.05);
+    }
+}
+
+@keyframes flashyExit {
+    25%, 100% {
+        transform: scale(1.75);
+        opacity: 0;
+    }
 }
 
 #stopwatch-container {
